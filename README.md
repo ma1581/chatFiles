@@ -39,4 +39,5 @@ Before you can use this project, you need remember this repository and configura
         ```
             streamlit run chat.py
         ```
+    *Note: Since some variables are not handled properly, there will be some errors popping up. Please Ignore that and use the Streamlit Application as needed*
 
