@@ -24,19 +24,19 @@ Before you can use this project, you need remember this repository and configura
 
 3. **Error Related to Streamlit** (Optional): 
    - If you get the `OSError: [Errno 28] inotify watch limit reached` error when running the project, you can run the below command to troublshoot it:
-        -Permanent Fix:    
-        ```
-            sudo nano /etc/sysctl.conf
-            fs.inotify.max_user_watches=524288
-            sudo sysctl -p
-        ```
-        -Temporary Fix(Will Vanish after Restart):
-        ```
-            sudo sysctl fs.inotify.max_user_watches=524288
-        ```
+        - Permanent Fix:    
+            ```
+                sudo nano /etc/sysctl.conf
+                fs.inotify.max_user_watches=524288
+                sudo sysctl -p
+            ```
+        - Temporary Fix(Will Vanish after Restart):
+            ```
+                sudo sysctl fs.inotify.max_user_watches=524288
+            ```
 4. **Running the Project**:
    - Execute below command to run the project:
-   ```
-        streamlit run chat.py
-   ```
+        ```
+            streamlit run chat.py
+        ```
 
