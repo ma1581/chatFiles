@@ -1,5 +1,5 @@
 # CHAT WITH FILES
-
+This is still in development and has certain parts which is not detailed in the Readme File.
 
 # Configuration & Usage:
 
@@ -22,22 +22,17 @@ Before you can use this project, you need remember this repository and configura
         pip install -r requirements.txt
      ```
 
-3. **Error Related to Streamlit** (Optional): 
-   - If you get the `OSError: [Errno 28] inotify watch limit reached` error when running the project, you can run the below command to troublshoot it:
-        - Permanent Fix:    
-            ```
-                sudo nano /etc/sysctl.conf
-                fs.inotify.max_user_watches=524288
-                sudo sysctl -p
-            ```
-        - Temporary Fix(Will Vanish after Restart):
-            ```
-                sudo sysctl fs.inotify.max_user_watches=524288
-            ```
 4. **Running the Project**:
    - Execute below command to run the project:
         ```
-            streamlit run chat.py
+            python3 orcaLang.py
         ```
-    *Note: Since some variables are not handled properly, there will be some errors popping up. Please Ignore that and use the Streamlit Application as needed*
+        - This command uses default input as below:
+            - Question : "Who are Cast of Wakanda Forever?"
+            - File : wkfor.txt
+            - Approach : simpleModel
+   -Below is the template to use custom inputs:
+        ```
+            python3 orcaLang.py --q "<question>" --f  <filename> --e <simpleModel/chatModel/vectorModel>
+        ``` 
 
