@@ -26,21 +26,20 @@ def main():
     # Process Button
     if st.button("Process"):
         if uploaded_file is not None:
-            # Read the file content
             file_content = uploaded_file.read()
-            # Process the file content
- 
-            # Display the processed content
+            file_content=file_content.decode('utf-8')
+            que=file_content+"\n\nAbove is the content extracted from a File.Answer the below Question based on the above Content alone.\n"+user_input+"\n\nPS:If the information relating a question is not available in the Content, simply say \"This Question is not within the Context of the Provided File\""
         else:
-            file_content=b'Nothing'
+            que=user_input
         
         if user_input:
-           output=query(file_content.decode('utf-8'),user_input)
+           print(query)
+           output=query(que)
            num_of_words=count_words(output)
            lines=output.count("\n")
             # Process the user input (you can replace this with your logic)
            st.text_area("Processed User Input", output, height=int(25 *((num_of_words/20)+lines)))
-    st.sidebar.text_area("Processed User Input",file_content.decode('utf-8'))        
+    st.sidebar.text_area("Processed User Input",file_content)        
 
 if __name__ == "__main__":
     main()
