@@ -33,6 +33,6 @@ Before you can use this project, you need remember this repository and configura
             - Approach : simpleModel
    -Below is the template to use custom inputs:
         ```
-            python3 orcaLang.py --q "<question>" --f  <filename> --e <simpleModel/chatModel/vectorModel>
+            python3 orcaLang.py --q "<question>" --f  <filename> --e <simpleModel/chatModel/vectorModel/textSplitModel>
         ``` 
 
