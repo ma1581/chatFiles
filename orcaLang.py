@@ -14,12 +14,25 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import HumanMessagePromptTemplate
 from langchain.schema.messages import SystemMessage
 from langchain.chat_models import ChatOllama
-
+import streamlit as st
+from dotenv import load_dotenv
+import pickle
+from streamlit_extras.add_vertical_space import add_vertical_space
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.llms import OpenAI
+from langchain.chains.question_answering import load_qa_chain
+from langchain.callbacks import get_openai_callback
+import os
+from langchain.document_loaders import TextLoader
+from langchain.embeddings import OllamaEmbeddings
+from langchain.llms import Ollama
 def main():
     import argparse
     parser=argparse.ArgumentParser()
-    parser.add_argument("--q",type=str,help="This is the Query",default="Who are Cast of Wakanda Forever?")
-    parser.add_argument("--f",type=str,help="This is File Location",default="wkfor.txt")
+    parser.add_argument("--q",type=str,help="This is the Query",default="How did Tollar Hugen's true identity and role as a guardian of realms unfold during his journey with Elara, and what impact did it have on the town of Eldoria?")
+    parser.add_argument("--f",type=str,help="This is File Location",default="ficStory.txt")
     parser.add_argument("--e",type=str,help="Emphasis")
     args=parser.parse_args()
     if args.e=='chatModel':
@@ -49,6 +62,9 @@ def main():
         print("vectorModel Answer")
         llm,vector=setupModelAndData(args.f)
         Query(llm,vector,args.q)
+    elif args.e=='textSplitModel':
+        ouput=DocSpecifc(args.q,args.f)
+        print(ouput)
     else:
         print("Simple Answer")
         llm=Ollama(model="orca-mini",callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
@@ -75,7 +91,28 @@ def setupModelAndData(file):
 def Query(llm,vectorstore,question):
     qachain=RetrievalQA.from_chain_type(llm,retriever=vectorstore.as_retriever())
     return qachain({"query":question})
-
+def splitter(pdf):
+    text = open(pdf,"r").read()
+    text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            length_function=len
+            )
+    return text_splitter.split_text(text=text)
+def vecstore2(query,file):
+    chunks=splitter(file)
+    embeddings = OllamaEmbeddings(
+    model="orca-mini",
+    )
+    VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
+    with open(f"test.pkl", "wb") as f:
+        pickle.dump(VectorStore, f)
+    docs = VectorStore.similarity_search(query=query, k=3)
+    return docs
+def DocSpecifc(question,file):
+    llm=Ollama(model="orca-mini")
+    chain = load_qa_chain(llm=llm, chain_type="stuff")
+    return chain.run(input_documents=vecstore2(question,file), question=question)
 
 if __name__=="__main__":
     main()
