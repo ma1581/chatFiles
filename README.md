@@ -61,10 +61,7 @@ Before you can use this project, you need remember this repository and configura
         ```
         
 # Bugs & Errors:
-- st.cache is deprecated
 - Extent of pdf to text conversion needs to be checked
 - Need to adjust the code to accept to talk freely even without input data
-- Only the files in the source is accepted
-- Only pdf and text files are accepted
-- Need to update the way document is loaded , so that files from anywhere can be loaded(internet/local).Currently restricted to code source directory.
+- videos and audio are not accepted
 - Please add on more bugs if found
