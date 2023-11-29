@@ -36,7 +36,13 @@ Before you can use this project, you need remember this repository and configura
             ```
                 sudo sysctl fs.inotify.max_user_watches=524288
             ```
-4. **Running the Project**:
+4. **Error Related to frontend pip library** (Optional): 
+   - For the frontend library to work, a empty static folder is necessary. 
+   - So run the below command if error `RunTimeError: Directory 'static/' does not exist` was found:
+      ```
+        mkdir static
+    ```
+5. **Running the Project**:
    - Execute below command to run the streamlit UI:
         ```
             streamlit run chat.py
