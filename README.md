@@ -41,7 +41,7 @@ Before you can use this project, you need remember this repository and configura
    - So run the below command if error `RunTimeError: Directory 'static/' does not exist` was found:
       ```
         mkdir static
-    ```
+        ```
 5. **Running the Project**:
    - Execute below command to run the streamlit UI:
         ```
