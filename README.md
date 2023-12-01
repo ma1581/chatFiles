@@ -1,7 +1,6 @@
 # CHAT WITH FILES
 This is still in development and has certain parts which is not detailed in the Readme File.
- 
-`Note: The Known Bugs in the system are listed below`
+`Note: The Known Bugs in the system are listed below and also include too many irrelevant component which will be optimised in subsequent commits`
 # Configuration & Usage:
 
 Before you can use this project, you need remember this repository and configuration is strictly only for Linux System. Follow these steps to get started:
@@ -47,18 +46,10 @@ Before you can use this project, you need remember this repository and configura
         ```
             streamlit run chat.py
         ```
-   - Use the below syntax to execute the CLI version`(This might not work as expected due to organisation of py modules)`:
+   - Use below code to execute the CLI version:
         ```
-            python3 orcaLang.py --q "<question>" --f  <filename> --e <simpleModel/chatModel/vectorModel/textSplitModel>
+            python3 main.py
         ``` 
-       - This command uses default input:
-            ```
-            python3 orcaLang.py
-        
-            #Question : "Who are Cast of Wakanda Forever?"
-            #File : wkfor.txt
-            #Approach : simpleModel
-            ```
         
 # Bugs & Errors:
 - Extent of pdf to text conversion needs to be checked
