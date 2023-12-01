@@ -3,7 +3,7 @@ import os
 
 from Conversion.convert import extract_text_from_pdf
 
-def getDataByType(path):
+def getFileType(path):
     file = os.path.basename(path)
     if file.lower().endswith('.pdf'):
         print(file)

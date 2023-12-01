@@ -26,10 +26,10 @@ import os
 from langchain.document_loaders import TextLoader
 from langchain.embeddings import OllamaEmbeddings
 from langchain.llms import Ollama
-from LLM.qa import *
-from LLM.qa import myQaChain
-from LLM.docProcess import getDataByType
-from Conversion.convert import extract_text_from_pdf
+from CFModules.LLM.qa import *
+from CFModules.LLM.qa import myQaChain
+from CFModules.LLM.docProcess import getDataByType
+from CFModules.Conversion.convert import extract_text_from_pdf
 def main():
     import argparse
     parser=argparse.ArgumentParser()

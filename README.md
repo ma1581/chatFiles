@@ -47,21 +47,23 @@ Before you can use this project, you need remember this repository and configura
         ```
             streamlit run chat.py
         ```
-   - Use the below syntax to execute the CLI version:
+   - Use the below syntax to execute the CLI version`(This might not work as expected due to organisation of py modules)`:
         ```
             python3 orcaLang.py --q "<question>" --f  <filename> --e <simpleModel/chatModel/vectorModel/textSplitModel>
         ``` 
        - This command uses default input:
-        ```
+            ```
             python3 orcaLang.py
         
             #Question : "Who are Cast of Wakanda Forever?"
             #File : wkfor.txt
             #Approach : simpleModel
-        ```
+            ```
         
 # Bugs & Errors:
 - Extent of pdf to text conversion needs to be checked
 - Need to adjust the code to accept to talk freely even without input data
 - videos and audio are not accepted
+- Add Environment file
+- Add Different modules under same root
 - Please add on more bugs if found

@@ -2,7 +2,7 @@ import streamlit as st
 from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from Conversion.convert import *
+from CFModules.Conversion.convert import *
 import os
 import atexit
 
