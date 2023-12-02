@@ -116,7 +116,7 @@ def vectorMain(env):
     # Create embeddings
     embeddings = OllamaEmbeddings(
         model=env["model"],
-        model_kwargs={"device": "cuda"},
+        model_kwargs={"device": env["processor"]},
     )
     # change the embedding type here if you are running into issues.
     # These are much smaller embeddings and will work for most appications
