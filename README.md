@@ -1,6 +1,5 @@
 # CHAT WITH FILES
 This is still in development and has certain parts which is not detailed in the Readme File.
- 
 `Note: The Known Bugs in the system are listed below`
 # Configuration & Usage:
 
@@ -47,24 +46,15 @@ Before you can use this project, you need remember this repository and configura
         ```
             streamlit run chat.py
         ```
-   - Use the below syntax to execute the CLI version:
+   - Use below code to execute the CLI version:
         ```
-            python3 orcaLang.py --q "<question>" --f  <filename> --e <simpleModel/chatModel/vectorModel/textSplitModel>
+            python3 main.py
         ``` 
-       - This command uses default input:
-        ```
-            python3 orcaLang.py
-        
-            #Question : "Who are Cast of Wakanda Forever?"
-            #File : wkfor.txt
-            #Approach : simpleModel
-        ```
         
 # Bugs & Errors:
-- st.cache is deprecated
 - Extent of pdf to text conversion needs to be checked
 - Need to adjust the code to accept to talk freely even without input data
-- Only the files in the source is accepted
-- Only pdf and text files are accepted
-- Need to update the way document is loaded , so that files from anywhere can be loaded(internet/local).Currently restricted to code source directory.
+- videos and audio are not accepted
+- Add Environment file
+- Add Different modules under same root
 - Please add on more bugs if found
