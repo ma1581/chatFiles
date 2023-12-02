@@ -1,6 +1,6 @@
 # CHAT WITH FILES
 This is still in development and has certain parts which is not detailed in the Readme File.
-`Note: The Known Bugs in the system are listed below and also include too many irrelevant component which will be optimised in subsequent commits`
+`Note: The Known Bugs in the system are listed below`
 # Configuration & Usage:
 
 Before you can use this project, you need remember this repository and configuration is strictly only for Linux System. Follow these steps to get started:

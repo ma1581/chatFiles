@@ -28,14 +28,14 @@ def load_single_document(file_path,env):
        file_extension = os.path.splitext(file_path)[1][1:]
        loader_class = env["conversionType"].get(file_extension)
        if loader_class:
-           file_log(file_path + ' loaded.')
+           file_log(file_path + ' loaded.',env)
            loader = loader_class(file_path)
        else:
-           file_log(file_path + ' document type is undefined.')
+           file_log(file_path + ' document type is undefined.',env)
            raise ValueError("Document type is undefined")
        return loader.load()[0]
     except Exception as ex:
-       file_log('%s loading error: \n%s' % (file_path, ex))
+       file_log('%s loading error: \n%s' % (file_path, ex),env)
        return None 
 
 def loadDocument(env):
@@ -61,7 +61,7 @@ def loadDocument(env):
             try:
                future = executor.submit(load_document_batch, filepaths,env)
             except Exception as ex:
-               file_log('executor task failed: %s' % (ex))
+               file_log('executor task failed: %s' % (ex),env)
                future = None
             if future is not None:
                futures.append(future)
@@ -72,12 +72,12 @@ def loadDocument(env):
                 contents, _ = future.result()
                 docs.extend(contents)
             except Exception as ex:
-                file_log('Exception: %s' % (ex))
+                file_log('Exception: %s' % (ex),env)
     print(docs)         
     return docs
 
-def file_log(logentry):
-   file1 = open("file_ingest.log","a")
+def file_log(logentry,env):
+   file1 = open(env["logDirectory"]+"/file_ingest.log","a")
    file1.write(logentry + "\n")
    file1.close()
    print(logentry + "\n")
@@ -90,7 +90,7 @@ def load_document_batch(filepaths,env):
         futures = [exe.submit(load_single_document, name,env) for name in filepaths]
         # collect data
         if futures is None:
-           file_log( 'Something failed to submit')
+           file_log( 'Something failed to submit',env)
            return None
         else:
            data_list = [future.result() for future in futures]

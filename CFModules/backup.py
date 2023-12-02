@@ -2,9 +2,9 @@ import os
 import csv
 from datetime import datetime
 
-def log_to_csv(question, answer):
+def log_to_csv(question, answer,loc):
 
-    log_dir, log_file = "local_chat_history", "qa_log.csv"
+    log_dir, log_file =loc, "qa_log.csv"
     # Ensure log directory exists, create if not
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
