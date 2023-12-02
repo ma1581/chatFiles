@@ -26,7 +26,6 @@ def retrieval_qa_pipline(env):
     )
     retriever = db.as_retriever()
     prompt, memory = get_prompt_template(history=env["history"])
-    print(memory)
 
     #llm=Ollama(model=env["model"])
     llm = ChatOllama(model=env["model"])
@@ -107,11 +106,26 @@ def main(env):
             time.sleep(1)
             break
 
+import shutil
+
+def copy_file(source_path, destination_path):
+    try:
+        shutil.copy(source_path, destination_path)
+        print(f"File copied successfully from {source_path} to {destination_path} to make VectorDB")
+    except FileNotFoundError:
+        print("File not found. Please check the source path.")
+    except PermissionError:
+        print("Permission error. Make sure you have the necessary permissions.")
 
 if __name__ == "__main__":
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)s - %(message)s", level=logging.INFO
     )
+
+    #This two line code exist because no upload function is added
+    file="ficStory.txt"
+    copy_file(env["sampleDirectory"]+file, env["digestDirectory"]+file)
+    
     vectorMain(env)
     main(env)
 
