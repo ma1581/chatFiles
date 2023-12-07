@@ -132,6 +132,47 @@ def vectorMain(env):
     )
 
 
+def vectorMainWithFaiss(env):
+    # Load documents and split in chunks
+    from langchain.vectorstores import FAISS
+
+    logging.info(f"Loading documents from {env['digestDirectory']}")
+    documents = loadDocument(env)
+    logging.info(f"Finished loading documents")
+    text_documents, python_documents = split_documents(documents)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    python_splitter = RecursiveCharacterTextSplitter.from_language(
+        language=Language.PYTHON, chunk_size=880, chunk_overlap=200
+    )
+    # texts = text_splitter.split_documents(text_documents)
+    # texts.extend(python_splitter.split_documents(python_documents))
+    texts=""
+    for doc in text_documents:
+        texts+=doc.page_content
+    
+    for doc in python_documents:
+        texts+=doc.page_content
+
+    texts = text_splitter.split_text(texts)
+    # texts.extend(python_splitter.split_text(python_documents))
+
+    logging.info(f"Loaded {len(documents)} documents from {env['digestDirectory']}")
+    logging.info(f"Split into {len(texts)} chunks of text")
+
+    # for doc in texts:
+    #     print("the doc page content is ")
+    #     print(doc.page_content)
+    
+    # Create embeddings
+    embeddings = OllamaEmbeddings(
+        model=env["model"],
+        model_kwargs={"device": env["processor"]},
+    )   
+    vectorstore = FAISS.from_texts(texts=texts, embedding=embeddings)
+    return vectorstore
+
+
+
 if __name__ == "__main__":
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)s - %(message)s", level=logging.INFO
