@@ -8,12 +8,12 @@ Created on Tue Nov 11 11:50:45 2023
 import fitz  # PyMuPDF library
 from PIL import Image
 import pytesseract
-import tkinter as tk
-from tkinter import filedialog
-import speech_recognition as sr
-from moviepy.editor import VideoFileClip, AudioFileClip
-import os
-import vosk
+# import tkinter as tk
+# from tkinter import filedialog
+# import speech_recognition as sr
+# from moviepy.editor import VideoFileClip, AudioFileClip
+# import os
+# import vosk
 
 
 def extract_text_from_pdf(pdf_path):
