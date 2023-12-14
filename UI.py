@@ -1,7 +1,3 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-    
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -45,12 +41,6 @@ def main():
     if user_question:
         handle_userinput(user_question)
     
-    # print the messages 
-    # for i, message in enumerate(st.session_state.chat_history):
-    #     st.write(user_template.replace(
-    #         "{{MSG}}", message[0]), unsafe_allow_html=True)
-    #     st.write(bot_template.replace(
-    #         "{{MSG}}", message[1]), unsafe_allow_html=True)
     for i, message in reversed(list(enumerate(st.session_state.chat_history))):
         st.write(bot_template.replace("{{MSG}}", message[1]), unsafe_allow_html=True)
         st.write(user_template.replace("{{MSG}}", message[0]), unsafe_allow_html=True)
