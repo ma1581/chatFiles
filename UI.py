@@ -32,13 +32,16 @@ def main():
     st.write(css, unsafe_allow_html=True)
 
     if "conversation" not in st.session_state:
-        st.session_state.conversation = None
+        st.session_state.conversation = retrieval_qa_pipline(env)
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
+    if "process_input" not in st.session_state:
+        st.session_state.process_input=True
+
 
     st.header("Chat with multiple PDFs :books:")
     user_question = st.text_input("Ask a question about your documents:")
-    if user_question:
+    if user_question and st.session_state.process_input:
         handle_userinput(user_question)
     
     for i, message in reversed(list(enumerate(st.session_state.chat_history))):
@@ -55,12 +58,15 @@ def main():
 
                 #process uploadede docs
                 #vids should be converted to text and place in digest dir as place_uploaded_docs is doing
+                st.session_state.process_input=False
+
                 place_uploaded_docs(pdf_docs)
                 vectorMain(env)
                 
 
                 # create conversation chain
                 st.session_state.conversation =retrieval_qa_pipline(env)
+                st.session_state.process_input=True
                 print("\nthe converstaion obj is :")
                 print(st.session_state.conversation)
 
