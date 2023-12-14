@@ -5,7 +5,7 @@ from CFModules.LLM.dataIngest import *
 from environment import env
 from langchain.chat_models import ChatOllama
 
-from langchain.vectorstores import Chroma
+# from langchain.vectorstores import Chroma
 from langchain.llms import Ollama
 from langchain.chains import RetrievalQA
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler  # for streaming response
@@ -54,10 +54,29 @@ def retrieval_qa_pipline(env):
 
     return qa
 
+def conversational_qa(vectorstore):
+    from langchain.memory import ConversationBufferMemory
+    from langchain.chains import ConversationalRetrievalChain
+
+    llm = ChatOllama(model=env["model"])
+    embeddings = OllamaEmbeddings(model=env["model"], model_kwargs={"device": env["processor"]})
+
+    memory = ConversationBufferMemory(
+        memory_key='chat_history', return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory,
+        chain_type="map_reduce"
+    )
+    return conversation_chain
+    
+    
 
 
 
-def main(env):
+
+def main(env,vectorstore):
     
     logging.info(f"Running on: {env['processor']}")
     logging.info(f"Display Source Documents set to: {env['showSources']}")
@@ -70,7 +89,8 @@ def main(env):
         os.mkdir(MODELS_PATH)
     '''
 
-    qa = retrieval_qa_pipline(env)
+    # qa = retrieval_qa_pipline(env)
+    qa=conversational_qa(vectorstore)
 
 
     # Interactive questions and answers
@@ -81,24 +101,15 @@ def main(env):
                 break
             # Get the answer from the chain
             res = qa(query)
-            answer, docs = res["result"], res["source_documents"]
 
-            # Print the result
-            print("\n\n> Question:")
-            print(query)
-            print("\n> Answer:")
-            print(answer)
-            if env["showSources"]:  # this is a flag that you can set to disable showing answers.
-                # # Print the relevant sources used for the answer
-                print("----------------------------------SOURCE DOCUMENTS---------------------------")
-                for document in docs:
-                    print("\n> " + document.metadata["source"] + ":")
-                    print(document.page_content)
-                print("----------------------------------SOURCE DOCUMENTS---------------------------")
 
-            # Log the Q&A to CSV only if save_qa is True
-            if env["log"]:
-                backup.log_to_csv(query, answer,env["logDirectory"])
+            for i, message in enumerate(res['chat_history']):
+                if i % 2 == 0:
+                    print('user question' +str(i) +": " + message.content)
+                else:
+                    print('bot answer ' +str(i) +": " + message.content)
+                print('\n')
+                    
         except KeyboardInterrupt:
             print("\n")
             time.sleep(1)
@@ -126,8 +137,10 @@ if __name__ == "__main__":
     file="ficStory.txt"
     copy_file(env["sampleDirectory"]+file, env["digestDirectory"]+file)
     
-    vectorMain(env)
-    main(env)
+    # vectorMain(env)
+    from CFModules.LLM.dataIngest import vectorMainWithFaiss
+    vectorstore=vectorMainWithFaiss(env)
+    main(env,vectorstore)
 
 
 
