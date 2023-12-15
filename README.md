@@ -46,9 +46,17 @@ Before you can use this project, you need remember this repository and configura
         ```
             streamlit run chat.py
         ```
-   - Use below code to execute the CLI version:
+    - Execute below command to run the streamlit UI (complete):
+        ```
+            streamlit run UI.py 
+        ```
+   - Use below code to execute the CLI version (uses Retrieval_qa):
         ```
             python3 main.py
+        ``` 
+    - Use below code to execute the CLI version (uses conversational_qa):
+        ```
+            python3 main2.py
         ``` 
         
 # Bugs & Errors:
