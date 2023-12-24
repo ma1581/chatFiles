@@ -39,7 +39,7 @@ def garbage_collection():
   delete_tempFiles( env["digestDirectory"])
 
 def main():
-    st.title("File Upload and Processing App")
+    st.title("Chat with documents using chatFiles")
     uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3"])
     if uploaded_file: logging.info(f"File Uploaded")
     # Initialize chat history
