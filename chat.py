@@ -4,9 +4,13 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from CFModules.Conversion.convert import *
 import os
+#import torch
 import atexit
 from streamlit.logger import get_logger
 from environment import env
+#import faster_whisper
+from faster_whisper import WhisperModel
+#from CFModules.Conversion.audioLoader import audio_to_text_model
 logging = get_logger(__name__)
 
 def delete_tempFiles(directory_path):
@@ -40,7 +44,7 @@ def main():
     st.title("File Upload and Processing App")
     data="None"
     # File Upload
-    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf"])
+    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3"])
     if uploaded_file: logging.info(f"File Uploaded")
     # User Input
     user_input = st.text_input("User Input:")
@@ -55,6 +59,16 @@ def main():
         elif uploaded_file.name.lower().endswith('.txt'):
             data=open(env["digestDirectory"]+uploaded_file.name,'r').read()    
             logging.info("Text Loaded")
+        elif uploaded_file.name.lower().endswith('.mp3'):
+            
+            #torch.cuda.empty_cache()
+            #print("Cleared cache")
+            audioLoaderVar=env["conversionType"]["mp3"]
+            alv=audioLoaderVar(env["digestDirectory"]+uploaded_file.name)
+            alv.get_segment(env["processor"])
+            data=alv.get_text()
+            
+            logging.info("MP3 Loaded")
 
     # Process Button
     if st.button("Process"):
