@@ -6,8 +6,12 @@ import os
 from CFModules.Conversion.textFileLoader import txtToString
 from CFModules.Conversion.convert import extract_text_from_pdf
 from langchain.document_loaders import PDFMinerLoader, TextLoader
+from CFModules.Conversion.audioLoader import AudioLoader
 from chromadb.config import Settings
-import torch
+#import torch
+#pro="cuda" if torch.cuda.is_available() else "cpu"
+#del sys.modules['torch']
+
 env={
     "model":"orca-mini",
     "rootDirectory":os.path.dirname(os.path.realpath(__file__)),
@@ -18,10 +22,11 @@ env={
     "CHROMA_SETTINGS" : Settings(anonymized_telemetry=False,is_persistent=True),
     "conversionType":{
         "txt":TextLoader,
-        "pdf":PDFMinerLoader
+        "pdf":PDFMinerLoader,
+        "mp3":AudioLoader
     },
     "cpuCount":os.cpu_count(),
-    "processor":"cuda" if torch.cuda.is_available() else "cpu",
+    "processor":"cuda",
     "showSources":False,
     "history":True,
     "log":True
