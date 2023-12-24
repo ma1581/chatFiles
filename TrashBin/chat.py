@@ -1,7 +1,4 @@
 import streamlit as st
-import random
-import time
-import streamlit as st
 from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -29,29 +26,28 @@ def delete_tempFiles(directory_path):
                 logging.info("Deleted File "+file_name)
     except Exception as e:
         logging.info(f"Error deleting files: {e}")
+
 @st.cache_data()
 def process_file(data, user_input):
     #data = extract_text_from_pdf(uploaded_file)
     result = Ollama(model="orca-mini", callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))("Context:" + data + "\nBased on only above content only, answer the below question.\n" + user_input)
     return result
+
 def garbage_collection():
   # Perform your desired cleanup tasks here
   delete_tempFiles( env["digestDirectory"])
 
+
+
+
 def main():
     st.title("File Upload and Processing App")
-    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3"])
-    if uploaded_file: logging.info(f"File Uploaded")
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-    # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
     data="None"
     # File Upload
-    
+    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3"])
+    if uploaded_file: logging.info(f"File Uploaded")
+    # User Input
+    user_input = st.text_input("User Input:")
     if uploaded_file is not None:
         destination_path = os.path.join( env["digestDirectory"], uploaded_file.name)
         with open(destination_path, "wb") as dest_file:
@@ -74,36 +70,11 @@ def main():
             
             logging.info("MP3 Loaded")
 
-    # Accept user input
-    if prompt := st.chat_input("What is up?"):
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            full_response = ""
-            assistant_response = process_file(data, prompt)
-            
-            # Simulate stream of response with milliseconds delay
-            for chunk in assistant_response.split():
-                full_response += chunk + " "
-                time.sleep(0.05)
-                # Add a blinking cursor to simulate typing
-                message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
-
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
-
-
-
-    
-    
-    
+    # Process Button
+    if st.button("Process"):
+        if user_input:
+           output=process_file(data, user_input)
+           st.text_area("BOT",output,height=500)
     st.sidebar.text_area("Processed File Content",data,height=750)
 
 if __name__ == "__main__":
