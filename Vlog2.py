@@ -15,33 +15,23 @@ class Vlogger:
         self.processor= BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
         self.model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
 
-
-    def __save_vids(self,uploaded_files):
-        for uploaded_file in uploaded_files:
-            if uploaded_file.type == "video/mp4":
-                file_path = env['uploadedVidsDirectory']+uploaded_file.name
-                with open(file_path, "wb") as f:
-                    shutil.copyfileobj(uploaded_file, f)
-            else:
-                logging.info('video/mp4", "the uploaded files contain non mp4 files .')
-                assert uploaded_file.type == "video/mp4", "the uploaded files contain non mp4 files . "
-
-
-
-    def __process_vid(self,uploaded_file):
-        assert uploaded_file.type == "video/mp4", "the uploaded files contain non mp4 files . "
+    def __process_vid(self,uploaded_file_path):
 
         frame_sampling_rate = env['frameSamplingRate']
         frame_count = 0
 
-        cap = cv2.VideoCapture(env["uploadedVidsDirectory"]+uploaded_file.name)
+        cap = cv2.VideoCapture(uploaded_file_path)
         text=""
-        print("the text is :" + str(env["uploadedVidsDirectory"]+uploaded_file.name)) 
+        print("the text is :" + str(uploaded_file_path)) 
+
 
         while cap.isOpened():
-            logging.info('working')
+            print('working')
             ret, frame = cap.read()
 
+            if not ret or frame is None:
+                break
+            
             # Convert to RGB if needed
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             pil_image = Image.fromarray(frame)
@@ -56,10 +46,9 @@ class Vlogger:
         return text
 
 
-
         # uploaded files must be mp4 and 
     def vid_to_text(self,uploaded_files):
-        self.__save_vids(uploaded_files)
+
         text=""
         count=1
         for uploaded_file in uploaded_files:
