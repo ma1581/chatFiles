@@ -13,6 +13,8 @@ from streamlit.logger import get_logger
 from environment import env
 #import faster_whisper
 from faster_whisper import WhisperModel
+from Vlog2 import Vlogger
+
 #from CFModules.Conversion.audioLoader import audio_to_text_model
 logging = get_logger(__name__)
 
@@ -40,7 +42,7 @@ def garbage_collection():
 
 def main():
     st.title("Chat with documents using chatFiles")
-    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3"])
+    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
     if uploaded_file: logging.info(f"File Uploaded")
     # Initialize chat history
     if "messages" not in st.session_state:
@@ -73,6 +75,13 @@ def main():
             data=alv.get_text()
             
             logging.info("MP3 Loaded")
+
+        elif uploaded_file.name.lower().endswith('.mp4'):
+            vlogger=Vlogger()
+            data=vlogger.vid_to_text([uploaded_file])
+            logging.info("MP4 Loaded")
+
+
 
     # Accept user input
     if prompt := st.chat_input("What is up?"):
