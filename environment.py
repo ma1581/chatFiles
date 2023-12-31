@@ -19,6 +19,9 @@ env={
     "sampleDirectory": os.path.dirname(os.path.realpath(__file__))+"/Data/SampleFiles/",
     "vectorDirectory": os.path.dirname(os.path.realpath(__file__))+"/Data/VectorDB/",
     "logDirectory": os.path.dirname(os.path.realpath(__file__))+"/Data/Log",
+    "uploadedVidsDirectory":os.path.dirname(os.path.realpath(__file__))+'/Data/UploadedVids/',
+    "tempFramesDirectory":os.path.dirname(os.path.realpath(__file__))+'/Data/TempFrames/',
+    "frameSamplingRate":3,
     "CHROMA_SETTINGS" : Settings(anonymized_telemetry=False,is_persistent=True),
     "conversionType":{
         "txt":TextLoader,

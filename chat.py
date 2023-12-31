@@ -13,6 +13,8 @@ from streamlit.logger import get_logger
 from environment import env
 #import faster_whisper
 from faster_whisper import WhisperModel
+from Vlog2 import Vlogger
+
 #from CFModules.Conversion.audioLoader import audio_to_text_model
 logging = get_logger(__name__)
 
@@ -39,8 +41,21 @@ def garbage_collection():
   delete_tempFiles( env["digestDirectory"])
 
 def main():
+    data="None"
     st.title("Chat with documents using chatFiles")
-    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3"])
+    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
+
+    # Get the absolute path to the MP4 file from user input
+    file_path_input = st.text_input("Enter the absolute path to the MP4 file:")
+
+    # Button to submit the input and process the video
+    if st.button("Submit"):
+        if file_path_input:
+            v=Vlogger()
+            data=v.vid_to_text([file_path_input])
+        else:
+            st.warning("Please enter the absolute path to the MP4 file.")
+
     if uploaded_file: logging.info(f"File Uploaded")
     # Initialize chat history
     if "messages" not in st.session_state:
@@ -49,7 +64,6 @@ def main():
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
-    data="None"
     # File Upload
     
     if uploaded_file is not None:
@@ -73,6 +87,8 @@ def main():
             data=alv.get_text()
             
             logging.info("MP3 Loaded")
+
+
 
     # Accept user input
     if prompt := st.chat_input("What is up?"):
@@ -100,10 +116,6 @@ def main():
         st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 
-
-    
-    
-    
     st.sidebar.text_area("Processed File Content",data,height=750)
 
 if __name__ == "__main__":

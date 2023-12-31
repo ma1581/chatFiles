@@ -46,6 +46,10 @@ Before you can use this project, you need remember this repository and configura
         ```
             streamlit run chat.py
         ```
+        ```
+            pass in the absolute path of the mp4 file present in /Data/UploadedVids for vid to text in  the chat.py UI. 
+        ```
+       
     - Execute below command to run the streamlit UI (complete):
         ```
             streamlit run UI.py 
