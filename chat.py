@@ -87,6 +87,7 @@ def main():
             data=alv.get_text()
             
             logging.info("MP3 Loaded")
+        
 
 
 
@@ -119,6 +120,8 @@ def main():
     st.sidebar.text_area("Processed File Content",data,height=750)
 
 if __name__ == "__main__":
+    logging.info(f"Running on: {env['processor']}")
+    logging.info(f"Display Source Documents set to: {env['showSources']}")
+    logging.info(f"Use history set to: {env['history']}")
     main()
     atexit.register(garbage_collection)
-

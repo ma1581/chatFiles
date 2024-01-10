@@ -1,7 +1,6 @@
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-
 import os
 from CFModules.Conversion.textFileLoader import txtToString
 from CFModules.Conversion.convert import extract_text_from_pdf

@@ -29,7 +29,7 @@ def retrieval_qa_pipline(env):
     prompt, memory = get_prompt_template(history=env["history"])
 
     #llm=Ollama(model=env["model"])
-    llm = ChatOllama(model=env["model"])
+    llm = Ollama(model=env["model"])
 
 
     if env["history"]:
@@ -52,7 +52,10 @@ def retrieval_qa_pipline(env):
                 "prompt": prompt,
             },
         )
-
+    print(dir(retriever))
+    print(retriever.to_json())
+    print(prompt)
+    print(memory)
     return qa
 
 
@@ -70,18 +73,19 @@ def main(env):
     if not os.path.exists(MODELS_PATH):
         os.mkdir(MODELS_PATH)
     '''
-
-    qa = retrieval_qa_pipline(env)
-
+    
 
     # Interactive questions and answers
     while True:
+        qa = retrieval_qa_pipline(env)
         try:
             query = input("\nEnter a query: ")
             if query == "exit":
                 break
             # Get the answer from the chain
+           
             res = qa(query)
+           
             answer, docs = res["result"], res["source_documents"]
 
             # Print the result
@@ -125,9 +129,9 @@ if __name__ == "__main__":
     )
 
     #This two line code exist because no upload function is added
-    file="ficStory.txt"
+    file="Paper.txt"
     copy_file(env["sampleDirectory"]+file, env["digestDirectory"]+file)
-    
+    logging.info(f"Using file "+env["digestDirectory"]+file)
     vectorMain(env)
     main(env)
 
