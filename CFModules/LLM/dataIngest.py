@@ -2,7 +2,6 @@ import os
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 import logging
 import click
-import torch
 from langchain.docstore.document import Document
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.text_splitter import Language, RecursiveCharacterTextSplitter
@@ -96,21 +95,22 @@ def load_document_batch(filepaths,env):
            data_list = [future.result() for future in futures]
            # return data and file paths
            return (data_list, filepaths)
+def loader(env,filename):
+    converter=env["conversionType"]["txt"]
+    loader=converter(env["digestDirectory"]+filename)
+    return loader.load()
 
-
-def vectorMain(env):
+def vectorMain(env,filename):
     # Load documents and split in chunks
-    logging.info(f"Loading documents from {env['digestDirectory']}")
-    documents = loadDocument(env)
-    logging.info(f"Finished loading documents")
-    text_documents, python_documents = split_documents(documents)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    python_splitter = RecursiveCharacterTextSplitter.from_language(
-        language=Language.PYTHON, chunk_size=880, chunk_overlap=200
-    )
+    logging.info(f"Parsing Content from {env['digestDirectory']}")
+    #documents = loadDocument(env)
+    text_documents= loader(env,filename)
+    
+    #text_documents, python_documents = split_documents(documents)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    
     texts = text_splitter.split_documents(text_documents)
-    texts.extend(python_splitter.split_documents(python_documents))
-    logging.info(f"Loaded {len(documents)} documents from {env['digestDirectory']}")
+    
     logging.info(f"Split into {len(texts)} chunks of text")
 
     # Create embeddings
@@ -118,6 +118,8 @@ def vectorMain(env):
         model=env["model"],
         model_kwargs={"device": env["processor"]},
     )
+    logging.info(f"Pushing Embeddings into VectorBD")
+
     # change the embedding type here if you are running into issues.
     # These are much smaller embeddings and will work for most appications
     # If you use HuggingFaceEmbeddings, make sure to also use the same in the
@@ -130,6 +132,8 @@ def vectorMain(env):
         embeddings,persist_directory=env["vectorDirectory"],
         client_settings=env["CHROMA_SETTINGS"]
     )
+    logging.info(f"Finished Creating VDB")
+
 
 
 def vectorMainWithFaiss(env):
@@ -156,8 +160,8 @@ def vectorMainWithFaiss(env):
     texts = text_splitter.split_text(texts)
     # texts.extend(python_splitter.split_text(python_documents))
 
-    logging.info(f"Loaded {len(documents)} documents from {env['digestDirectory']}")
-    logging.info(f"Split into {len(texts)} chunks of text")
+    print(f"Loaded {len(documents)} documents from {env['digestDirectory']}")
+    print(f"Split into {len(texts)} chunks of text")
 
     # for doc in texts:
     #     print("the doc page content is ")

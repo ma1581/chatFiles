@@ -6,6 +6,7 @@ from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from CFModules.Conversion.convert import *
+from CFModules.LLM.dataIngest import * 
 import os
 #import torch
 import atexit
@@ -14,10 +15,9 @@ from environment import env
 #import faster_whisper
 from faster_whisper import WhisperModel
 from Vlog2 import Vlogger
-
+import main as climain
 #from CFModules.Conversion.audioLoader import audio_to_text_model
 logging = get_logger(__name__)
-
 def delete_tempFiles(directory_path):
     try:
         # Get the list of all files in the directory
@@ -41,21 +41,19 @@ def garbage_collection():
   delete_tempFiles( env["digestDirectory"])
 
 def main():
-    data="None"
+    print("Calling stream main")
     st.title("Chat with documents using chatFiles")
     uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
-
     # Get the absolute path to the MP4 file from user input
-    file_path_input = st.text_input("Enter the absolute path to the MP4 file:")
+    # file_path_input = st.text_input("Enter the absolute path to the MP4 file:")
 
     # Button to submit the input and process the video
-    if st.button("Submit"):
-        if file_path_input:
-            v=Vlogger()
-            data=v.vid_to_text([file_path_input])
-        else:
-            st.warning("Please enter the absolute path to the MP4 file.")
-
+    # if st.button("Submit"):
+    #     if file_path_input:
+    #         v=Vlogger()
+    #         data=v.vid_to_text([file_path_input])
+    #     else:
+    #         st.warning("Please enter the absolute path to the MP4 file.")
     if uploaded_file: logging.info(f"File Uploaded")
     # Initialize chat history
     if "messages" not in st.session_state:
@@ -65,18 +63,22 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
     # File Upload
-    
-    if uploaded_file is not None:
+    if uploaded_file is not None and "data" not in st.session_state:
+        logging.info(f"Duplicating file")
         destination_path = os.path.join( env["digestDirectory"], uploaded_file.name)
         with open(destination_path, "wb") as dest_file:
             dest_file.write(uploaded_file.read())
         logging.info("File Stashed Temporarily")
+        logging.info(f"Extacting Content")
         if uploaded_file.name.lower().endswith('.pdf'):
-            data=extract_text_from_pdf( env["digestDirectory"]+uploaded_file.name)
+            pdfLoaderVar=env["conversionType"]["pdf"]
+            pdfloader=pdfLoaderVar(env["digestDirectory"]+uploaded_file.name)
+            data=pdfloader.load()
             logging.info("Pdf Loaded")
         elif uploaded_file.name.lower().endswith('.txt'):
-            data=open(env["digestDirectory"]+uploaded_file.name,'r').read()    
-            logging.info("Text Loaded")
+            vectorMain(env,uploaded_file.name)
+            st.session_state.data="not none"
+            logging.info("Text Loaded into Vector DB")
         elif uploaded_file.name.lower().endswith('.mp3'):
             
             #torch.cuda.empty_cache()
@@ -89,7 +91,7 @@ def main():
             logging.info("MP3 Loaded")
         
 
-
+    
 
     # Accept user input
     if prompt := st.chat_input("What is up?"):
@@ -103,8 +105,8 @@ def main():
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
             full_response = ""
-            assistant_response = process_file(data, prompt)
-            
+            #assistant_response = process_file(data, prompt)
+            assistant_response =climain.main(env,prompt)
             # Simulate stream of response with milliseconds delay
             for chunk in assistant_response.split():
                 full_response += chunk + " "
@@ -117,11 +119,8 @@ def main():
         st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 
-    st.sidebar.text_area("Processed File Content",data,height=750)
+    st.sidebar.text_area("Processed File Content",st.session_state.data if "data" in st.session_state else "None",height=750)
 
 if __name__ == "__main__":
-    logging.info(f"Running on: {env['processor']}")
-    logging.info(f"Display Source Documents set to: {env['showSources']}")
-    logging.info(f"Use history set to: {env['history']}")
     main()
     atexit.register(garbage_collection)

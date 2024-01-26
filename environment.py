@@ -29,8 +29,8 @@ env={
     },
     "cpuCount":os.cpu_count(),
     "processor":"cuda",
-    "showSources":False,
-    "history":True,
+    "showSources":True,
+    "history":False,
     "log":True
 }
  
