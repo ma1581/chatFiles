@@ -95,16 +95,30 @@ def load_document_batch(filepaths,env):
            data_list = [future.result() for future in futures]
            # return data and file paths
            return (data_list, filepaths)
-def loader(env,filename):
-    converter=env["conversionType"]["txt"]
-    loader=converter(env["digestDirectory"]+filename)
+def loader(env,filename,format):
+    if format=="txt":
+        converter=env["conversionType"]["txt"]
+        loader=converter(env["digestDirectory"]+filename)
+    elif format=="pdf":
+        pdfLoaderVar=env["conversionType"]["pdf"]
+        loader=pdfLoaderVar(env["digestDirectory"]+filename)
+    elif format=="mp3":
+        audioLoaderVar=env["conversionType"]["mp3"]
+        alv=audioLoaderVar(env["digestDirectory"]+filename)
+        alv.get_segment(env["processor"]) 
+        data=alv.get_text()
+        newfile=filename[:-4] + ".txt"
+        destination_path = os.path.join( env["digestDirectory"],newfile)
+        with open(destination_path, "wb") as dest_file:
+            dest_file.write(data)
+        loader(env,newfile,"txt")           
     return loader.load()
 
-def vectorMain(env,filename):
+def vectorMain(env,filename,format):
     # Load documents and split in chunks
     logging.info(f"Parsing Content from {env['digestDirectory']}")
     #documents = loadDocument(env)
-    text_documents= loader(env,filename)
+    text_documents= loader(env,filename,format)
     
     #text_documents, python_documents = split_documents(documents)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)

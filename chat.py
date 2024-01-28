@@ -75,23 +75,16 @@ def main():
         logging.info("File Stashed Temporarily")
         logging.info(f"Extacting Content")
         if uploaded_file.name.lower().endswith('.pdf'):
-            pdfLoaderVar=env["conversionType"]["pdf"]
-            pdfloader=pdfLoaderVar(env["digestDirectory"]+uploaded_file.name)
-            data=pdfloader.load()
+            vectorMain(env,uploaded_file.name,"pdf")
+            st.session_state.data=uploaded_file.name
             logging.info("Pdf Loaded")
         elif uploaded_file.name.lower().endswith('.txt'):
-            vectorMain(env,uploaded_file.name)
+            vectorMain(env,uploaded_file.name,"txt")
             st.session_state.data=uploaded_file.name
             logging.info("Text Loaded into Vector DB")
-        elif uploaded_file.name.lower().endswith('.mp3'):
-            
-            #torch.cuda.empty_cache()
-            #print("Cleared cache")
-            audioLoaderVar=env["conversionType"]["mp3"]
-            alv=audioLoaderVar(env["digestDirectory"]+uploaded_file.name)
-            alv.get_segment(env["processor"])
-            data=alv.get_text()
-            
+        elif uploaded_file.name.lower().endswith('.mp3'):        
+            vectorMain(env,uploaded_file.name,"mp3")            
+            st.session_state.data=uploaded_file.name
             logging.info("MP3 Loaded")
         
 
