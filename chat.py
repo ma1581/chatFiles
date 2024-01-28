@@ -42,6 +42,9 @@ def garbage_collection():
 
 def main():
     print("Calling stream main")
+    if 'data' not in st.session_state:
+        st.session_state.data = None
+    print(st.session_state.data)
     st.title("Chat with documents using chatFiles")
     uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
     # Get the absolute path to the MP4 file from user input
@@ -54,7 +57,8 @@ def main():
     #         data=v.vid_to_text([file_path_input])
     #     else:
     #         st.warning("Please enter the absolute path to the MP4 file.")
-    if uploaded_file: logging.info(f"File Uploaded")
+    if uploaded_file : 
+        logging.info(f"File Uploaded")
     # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -63,7 +67,7 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
     # File Upload
-    if uploaded_file is not None and "data" not in st.session_state:
+    if uploaded_file is not None and (st.session_state.data==None or uploaded_file.name!=st.session_state.data):
         logging.info(f"Duplicating file")
         destination_path = os.path.join( env["digestDirectory"], uploaded_file.name)
         with open(destination_path, "wb") as dest_file:
@@ -77,7 +81,7 @@ def main():
             logging.info("Pdf Loaded")
         elif uploaded_file.name.lower().endswith('.txt'):
             vectorMain(env,uploaded_file.name)
-            st.session_state.data="not none"
+            st.session_state.data=uploaded_file.name
             logging.info("Text Loaded into Vector DB")
         elif uploaded_file.name.lower().endswith('.mp3'):
             
@@ -106,7 +110,7 @@ def main():
             message_placeholder = st.empty()
             full_response = ""
             #assistant_response = process_file(data, prompt)
-            assistant_response =climain.main(env,prompt)
+            assistant_response =climain.main(env,prompt,uploaded_file.name)
             # Simulate stream of response with milliseconds delay
             for chunk in assistant_response.split():
                 full_response += chunk + " "

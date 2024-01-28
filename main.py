@@ -85,11 +85,9 @@ def invoke_on_call(func,query):
 
 
 def rag(env,query):
-
+    logging.info(f"Using RAG chain")
     retriever = db.as_retriever(search_type="similarity",search_kwargs={"k": 4})
-
     from langchain_core.prompts import PromptTemplate
-
     template = """Use the following pieces of context to answer the question at the end.
     If you don't know the answer, just say that you don't know, don't try to make up an answer.
     Use three sentences maximum and keep the answer as concise as possible.
@@ -172,16 +170,16 @@ def interative_main(env):
             print("\nThank You for using chatFiles")
             break
 
-def main(env,query):
+def main(env,query,file):
     #in other words singleton objs
-    if(llm==None):
-        initialize_global_objects()
+    
+    initialize_global_objects(file)
 
     qa= invoke_on_call(rag,query)
     answer=qa(env,query)
     return answer
 
-def initialize_global_objects():
+def initialize_global_objects(file=None):
     global embeddings
     global db 
     global llm
@@ -190,8 +188,11 @@ def initialize_global_objects():
     db = Chroma(
             persist_directory=env["vectorDirectory"],
             embedding_function=embeddings,
-            client_settings=env["CHROMA_SETTINGS"]
+            client_settings=env["CHROMA_SETTINGS"],
+            collection_name=file
         )
+    print(db)
+    print("This is from :",db._collection)
     llm = Ollama(model=env["model"])
 
 import shutil
@@ -218,7 +219,7 @@ if __name__ == "__main__":
     # newVectorMain(env,file)
     # ----------------------------------------------------------------
 
-    initialize_global_objects()
+    initialize_global_objects(file)
 
     res=interative_main(env)
 

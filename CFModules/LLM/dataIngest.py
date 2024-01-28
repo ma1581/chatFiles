@@ -119,18 +119,29 @@ def vectorMain(env,filename):
         model_kwargs={"device": env["processor"]},
     )
     logging.info(f"Pushing Embeddings into VectorBD")
-
     # change the embedding type here if you are running into issues.
     # These are much smaller embeddings and will work for most appications
     # If you use HuggingFaceEmbeddings, make sure to also use the same in the
     # run_localGPT.py file.
 
     # embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+    
+    vectorstore=Chroma(
+            persist_directory=env["vectorDirectory"],
+            client_settings=env["CHROMA_SETTINGS"],
+        )
+    logging.info("Checking if VDB already exists")
+    for i in vectorstore._client.list_collections():
+        if i.name==filename:
+            logging.info("VectorStore Already present")
+            return
+    logging.info("Creating new VDB")
 
     db = Chroma.from_documents(
         texts,
         embeddings,persist_directory=env["vectorDirectory"],
-        client_settings=env["CHROMA_SETTINGS"]
+        client_settings=env["CHROMA_SETTINGS"],
+        collection_name=filename
     )
     logging.info(f"Finished Creating VDB")
 
@@ -168,6 +179,7 @@ def vectorMainWithFaiss(env):
     #     print(doc.page_content)
     
     # Create embeddings
+    
     embeddings = OllamaEmbeddings(
         model=env["model"],
         model_kwargs={"device": env["processor"]},
