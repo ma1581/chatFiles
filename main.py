@@ -20,21 +20,23 @@ import time
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-def format_docs(docs):
-        return "\n\n".join(doc.page_content for doc in docs)
 
-def multiquery(env,query):   
-    print("Fetching embeddings...")
-    embeddings = OllamaEmbeddings(model=env["model"], model_kwargs={"device": env["processor"]})
-    print("Fetching db...")
-    db = Chroma(
-        persist_directory=env["vectorDirectory"],
-        embedding_function=embeddings,
-        client_settings=env["CHROMA_SETTINGS"]
-    )
-    print("Fetching llm")
-    llm = Ollama(model=env["model"])
-    print("Fetching retriever")
+def format_docs(docs):
+  formatted_docs = "\n\n".join(doc.page_content for doc in docs)  # Create the formatted string
+  str1="-"*50
+  print("\n")
+  logging.info(str1 + "these are the documnets retrieved for this query " +str1)
+  print(formatted_docs)  # Print the formatted string
+  print('\n')
+  return formatted_docs  # Return the formatted string for further use
+
+
+embeddings=None
+db=None
+llm=None
+
+
+def multiquery(env,query):  
     retriever=MultiQueryRetriever.from_llm(retriever=db.as_retriever(),llm=llm)
     docs=retriever.get_relevant_documents(query=query)
     print(docs)
@@ -61,32 +63,39 @@ def multiquery(env,query):
     print("\n\n\n")
     print(out['text'])
 
+def invoke_on_call(func,query):
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+
+        result = result.invoke(input=query)
+
+        return result
+    
+    def wrapper_for_qa(*args, **kwargs):
+        result = func(*args, **kwargs)
+        # If the result is callable, assume it's the chain and invoke it
+        if callable(result):
+            result = result(query)
+
+        return result['result']
+
+    if(func==retrieval_qa_pipline):
+        return wrapper_for_qa
+    else: return wrapper
+
+
 def rag(env,query):
-    embeddings = OllamaEmbeddings(model=env["model"], model_kwargs={"device": env["processor"]})
-    db = Chroma(
-        persist_directory=env["vectorDirectory"],
-        embedding_function=embeddings,
-        client_settings=env["CHROMA_SETTINGS"]
-    )
-    llm = Ollama(model=env["model"])
 
-    retriever = db.as_retriever(search_type="similarity",search_kwargs={"k": 2})
+    retriever = db.as_retriever(search_type="similarity",search_kwargs={"k": 4})
 
-    #retriever=db.similarity_search(query)
-    retrieved_docs = retriever.get_relevant_documents(query)
-    print(type(retriever))
-    print(type(retrieved_docs))
-    for i in retrieved_docs:
-        print(type(i))
-        print(i)
-    #for i in range(0,len(retrieved_docs)):
-    #    print(retrieved_docs[i].page_content)
     from langchain_core.prompts import PromptTemplate
 
     template = """Use the following pieces of context to answer the question at the end.
     If you don't know the answer, just say that you don't know, don't try to make up an answer.
     Use three sentences maximum and keep the answer as concise as possible.
-    Always say "thanks for asking!" at the end of the answer.
+    Always say "thanks for asking!" at the end of the answer. 
+    if any coding questions are asked , 
+    answer them as best as possible eventhough they could not be related to the context 
     
     {context}
     
@@ -100,17 +109,11 @@ def rag(env,query):
         | llm
         | StrOutputParser()
     )
-    print(rag_chain)
+    # print(rag_chain)
     return rag_chain
-    
+
+
 def retrieval_qa_pipline(env,query):
-    embeddings = OllamaEmbeddings(model=env["model"], model_kwargs={"device": env["processor"]})
-    db = Chroma(
-        persist_directory=env["vectorDirectory"],
-        embedding_function=embeddings,
-        client_settings=env["CHROMA_SETTINGS"]
-    )
-    llm = Ollama(model=env["model"])
     retriever = db.as_retriever()
     prompt, memory = get_prompt_template(history=env["history"])
     if env["history"]:
@@ -134,71 +137,62 @@ def retrieval_qa_pipline(env,query):
             },
         )
     return qa
-'''    prompt, memory = get_prompt_template(history=env["history"])
-    print(prompt)
-    #llm=Ollama(model=env["model"])
-    
-
-    print(retriever)
-    if env["history"]:
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",  # try other chains types as well. refine, map_reduce, map_rerank
-            retriever=retriever,
-            return_source_documents=True,  # verbose=True,
-            callbacks=callback_manager,
-            chain_type_kwargs={"prompt": prompt, "memory": memory},
-        )
-    else:
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",  # try other chains types as well. refine, map_reduce, map_rerank
-            retriever=retriever,
-            return_source_documents=True,  # verbose=True,
-            callbacks=callback_manager,
-            chain_type_kwargs={
-                "prompt": prompt,
-            },
-        )
-
-    return qa
-'''
 
 
+def interative_main(env):
 
-def main(env,query=None):
-    
     logging.info(f"Running on: {env['processor']}")
     logging.info(f"Display Source Documents set to: {env['showSources']}")
     logging.info(f"Use history set to: {env['history']}")
-    
-    try:
-        #qa = retrieval_qa_pipline(env,query)
-        qa = retrieval_qa_pipline(env,query)
-        logging.info("Communicating with llm")
-        res = qa(query)
-        answer, docs = res["result"], res["source_documents"]
-        logging.info("_"*100)
-        return answer
-        #for chunk in qa.stream(query):
-        #    print(chunk, end="", flush=True)
-        # Get the answer from the chain
-       
-        
-        # Print the result
-        #print("\n\n> Question:")
-        #print(query)
-        #print("\n> Answer:")
-        #print(answer)
 
-        # Log the Q&A to CSV only if save_qa is True
-        if env["log"]:
-            backup.log_to_csv(query, answer,env["logDirectory"])
-    except KeyboardInterrupt:
-        print("\n")
-        time.sleep(1)
-        print("\nThank You for using chatFiles")
-        time.sleep(1)
+    while True:
+        try:
+            query = input("Ask a question (or type 'quit' to exit): ")
+            if query.lower() == "quit":
+                break
+
+            #uncomment the lines specific to what pipeline you want to use  
+
+            # Retrieve and answer the question
+            qa= invoke_on_call(rag,query)
+
+            logging.info("Communicating with llm")
+            answer=qa(env,query)
+            logging.info("_" * 100)
+            print("the answer to your question ")
+            print(answer)
+
+            # Log the interaction if logging is enabled
+            if env["log"]:
+                backup.log_to_csv(query, answer, env["logDirectory"])
+
+        except KeyboardInterrupt:
+            print("\n")
+            time.sleep(1)
+            print("\nThank You for using chatFiles")
+            break
+
+def main(env,query):
+    #in other words singleton objs
+    if(llm==None):
+        initialize_global_objects()
+
+    qa= invoke_on_call(rag,query)
+    answer=qa(env,query)
+    return answer
+
+def initialize_global_objects():
+    global embeddings
+    global db 
+    global llm
+
+    embeddings = OllamaEmbeddings(model=env["model"], model_kwargs={"device": env["processor"]})
+    db = Chroma(
+            persist_directory=env["vectorDirectory"],
+            embedding_function=embeddings,
+            client_settings=env["CHROMA_SETTINGS"]
+        )
+    llm = Ollama(model=env["model"])
 
 import shutil
 
@@ -213,15 +207,20 @@ def copy_file(source_path, destination_path):
         print("Permission error. Make sure you have the necessary permissions.")
 
 if __name__ == "__main__":
-    
+
     #This two line code exist because no upload function is added
-    file="multiStory.txt"
+    file="ficStory.txt"
     copy_file(env["sampleDirectory"]+file, env["digestDirectory"]+file)
     logging.info(f"Using file "+env["digestDirectory"]+file)
-    #vectorMain(env,file)
-    q=input("Enter a query:")
-    res=main(env,q)
-    print(res)
+
+    # ----------------------------------------------------------------
+    vectorMain(env,file)
+    # newVectorMain(env,file)
+    # ----------------------------------------------------------------
+
+    initialize_global_objects()
+
+    res=interative_main(env)
 
 
 
