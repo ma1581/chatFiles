@@ -31,6 +31,7 @@ env={
     "processor":"cuda",
     "showSources":True,
     "history":False,
-    "log":True
+    "log":True,
+    "chat_history_window":2
 }
  

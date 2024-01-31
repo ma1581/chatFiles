@@ -34,6 +34,7 @@ def format_docs(docs):
 embeddings=None
 db=None
 llm=None
+chat_history=[]
 
 
 def multiquery(env,query):  
@@ -63,11 +64,37 @@ def multiquery(env,query):
     print("\n\n\n")
     print(out['text'])
 
+
 def invoke_on_call(func,query):
+    
+    def format_chat_history(chat_history):
+        return_string=""
+        for i in chat_history:
+            return_string+="Human: "
+            return_string+=i[0] +'\n'
+            return_string+="AI :"
+            return_string+=i[1] +'\n'
+        return return_string 
+
+    
     def wrapper(*args, **kwargs):
+        global chat_history
+
         result = func(*args, **kwargs)
 
-        result = result.invoke(input=query)
+        result = result.invoke(input={
+            "question":query,
+            "conv_history":format_chat_history(chat_history)
+        })
+
+        if(len(chat_history)>=env['chat_history_window']):
+            chat_history.pop(0)
+        chat_history.append([query,result])
+        
+        print("--"*40)
+        print("the chat_history is : ")
+        print(format_chat_history(chat_history))
+        
 
         return result
     
@@ -83,31 +110,28 @@ def invoke_on_call(func,query):
         return wrapper_for_qa
     else: return wrapper
 
+    # Always say "thanks for asking!" at the end of the answer. 
 
 def rag(env,query):
     logging.info(f"Using RAG chain")
-    retriever = db.as_retriever(search_type="similarity",search_kwargs={"k": 4})
+    retriever = db.as_retriever(search_type="similarity",search_kwargs={"k": 2})
     from langchain_core.prompts import PromptTemplate
-    template = """Use the following pieces of context to answer the question at the end.
-    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    template = """you are a chatbot , use the following pieces of context to answer the question at the end.
+    If you don't know the answer, just say that you don't know. refer the conversation history if relevant to the question.
     Use three sentences maximum and keep the answer as concise as possible.
-    Always say "thanks for asking!" at the end of the answer. 
     if any coding questions are asked , 
     answer them as best as possible eventhough they could not be related to the context. 
     
-    <Conversation History> :{conv_history}
-    </Conversation History>
     Context :{context}
+
+    Conversation History :{conv_history}
     
     Question: {question}
     
     Helpful Answer:"""
     custom_rag_prompt = PromptTemplate.from_template(template)
     rag_chain = (
-        {"context": retriever| format_docs, "question": RunnablePassthrough(),"conv_history":"""
-            Human: What is Tollar hugen doing 
-            bot : he i a character from eldoria
-        """ | RunnablePassthrough()}
+        {"context": retriever| format_docs, "question": RunnablePassthrough(),"conv_history":RunnablePassthrough()}
         | custom_rag_prompt
         | llm
         | StrOutputParser()
@@ -220,7 +244,7 @@ if __name__ == "__main__":
     logging.info(f"Using file "+env["digestDirectory"]+file)
 
     # ----------------------------------------------------------------
-    vectorMain(env,file)
+    vectorMain(env,file,"txt")
     # newVectorMain(env,file)
     # ----------------------------------------------------------------
 
