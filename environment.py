@@ -7,12 +7,13 @@ from CFModules.Conversion.convert import extract_text_from_pdf
 from langchain.document_loaders import PDFMinerLoader, TextLoader
 from CFModules.Conversion.audioLoader import AudioLoader
 from chromadb.config import Settings
+
 #import torch
 #pro="cuda" if torch.cuda.is_available() else "cpu"
 #del sys.modules['torch']
 
 env={
-    "model":"orca-mini",
+    "model":None,
     "rootDirectory":os.path.dirname(os.path.realpath(__file__)),
     "digestDirectory": os.path.dirname(os.path.realpath(__file__))+"/Data/TempFiles/",
     "sampleDirectory": os.path.dirname(os.path.realpath(__file__))+"/Data/SampleFiles/",

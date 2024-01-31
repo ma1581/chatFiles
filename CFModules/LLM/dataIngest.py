@@ -129,7 +129,7 @@ def vectorMain(env,filename,format):
 
     # Create embeddings
     embeddings = OllamaEmbeddings(
-        model=env["model"],
+        model="orca-mini",
         model_kwargs={"device": env["processor"]},
     )
     logging.info(f"Pushing Embeddings into VectorBD")

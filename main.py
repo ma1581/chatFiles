@@ -21,6 +21,13 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
+from langchain import HuggingFaceHub
+
+
+
+
+
+
 def format_docs(docs):
   formatted_docs = "\n\n".join(doc.page_content for doc in docs)  # Create the formatted string
   str1="-"*50
@@ -34,7 +41,6 @@ def format_docs(docs):
 embeddings=None
 db=None
 llm=None
-
 
 def multiquery(env,query):  
     retriever=MultiQueryRetriever.from_llm(retriever=db.as_retriever(),llm=llm)
@@ -184,7 +190,7 @@ def initialize_global_objects(file=None):
     global db 
     global llm
 
-    embeddings = OllamaEmbeddings(model=env["model"], model_kwargs={"device": env["processor"]})
+    embeddings = OllamaEmbeddings(model="orca-mini", model_kwargs={"device": env["processor"]})
     db = Chroma(
             persist_directory=env["vectorDirectory"],
             embedding_function=embeddings,
@@ -193,7 +199,7 @@ def initialize_global_objects(file=None):
         )
     print(db)
     print("This is from :",db._collection)
-    llm = Ollama(model=env["model"])
+    llm = env["model"]
 
 import shutil
 
