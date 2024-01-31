@@ -89,3 +89,10 @@ Before you can use this project, you need remember this repository and configura
         - Have made sure that vectorestore is created when pdf or audio is uploaded
     - `Whats not Done`:
         - Have yet to run it check for the working of code aka Testing
+
+
+- To enable option to switch between models
+    - `Whats Done` :
+        - Have modified the relevant code to use model from environment file, which is set by new chat.py file called `hfchat.py`
+    - `Whats Not Done` :
+        - Need to check into the internal anaswer retrieval as per mistral model and contruct respective answer layout for different models
