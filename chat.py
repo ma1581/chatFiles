@@ -10,6 +10,8 @@ from CFModules.LLM.dataIngest import *
 import os
 #import torch
 import atexit
+import streamlit as st
+
 from streamlit.logger import get_logger
 from environment import env
 #import faster_whisper
@@ -116,8 +118,15 @@ def main():
         st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 
-    st.sidebar.text_area("Processed File Content",st.session_state.data if "data" in st.session_state else "None",height=750)
-
+    with st.sidebar:
+        option = st.selectbox(
+           "Select Model",
+           ("Ollama:Orca-mini", "HF:Mistral"),
+           index=None,
+           placeholder="....",
+        )
+        st.write('You selected:', option)
+        
 if __name__ == "__main__":
     main()
     atexit.register(garbage_collection)
