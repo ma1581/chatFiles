@@ -93,16 +93,21 @@ def rag(env,query):
     Use three sentences maximum and keep the answer as concise as possible.
     Always say "thanks for asking!" at the end of the answer. 
     if any coding questions are asked , 
-    answer them as best as possible eventhough they could not be related to the context 
+    answer them as best as possible eventhough they could not be related to the context. 
     
-    {context}
+    <Conversation History> :{conv_history}
+    </Conversation History>
+    Context :{context}
     
     Question: {question}
     
     Helpful Answer:"""
     custom_rag_prompt = PromptTemplate.from_template(template)
     rag_chain = (
-        {"context": retriever| format_docs, "question": RunnablePassthrough()}
+        {"context": retriever| format_docs, "question": RunnablePassthrough(),"conv_history":"""
+            Human: What is Tollar hugen doing 
+            bot : he i a character from eldoria
+        """ | RunnablePassthrough()}
         | custom_rag_prompt
         | llm
         | StrOutputParser()
