@@ -42,3 +42,18 @@ user_template = '''
     <div class="message">{{MSG}}</div>
 </div>
 '''
+
+
+script='''
+<script>
+    function sayHello() {
+        alert('Hello, World!');
+    }
+</script>
+'''
+button_template='''
+
+<button id="helloButton" onclick="sayHello()">Click me for Hello World!</button>
+
+
+'''

@@ -97,9 +97,13 @@ def rag(env,query):
     template = """Use the following pieces of context to answer the question at the end.
     If you don't know the answer, just say that you don't know, don't try to make up an answer.
     Use three sentences maximum and keep the answer as concise as possible.
-    Always say "thanks for asking!" at the end of the answer. 
     if any coding questions are asked , 
-    answer them as best as possible eventhough they could not be related to the context 
+    answer them as best as possible eventhough they could not be related to the context.
+    Please use only this format for the code   
+    ``` specify coding language used \n
+    write code here \n
+    ``` . 
+
     
     {context}
     
