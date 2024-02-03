@@ -70,3 +70,29 @@ Before you can use this project, you need remember this repository and configura
 - Add Environment file
 - Add Different modules under same root
 - Please add on more bugs if found
+
+# Current developements bugs and features (todos)
+- add history to prompt template , implementation info : the q&a should be stored within list/dict and inputted into the prompt 
+- the current rag implementation is using a retriver to retrieve only the top 4 docs , if this is increased map_reduce chain would be required 
+.I tried the current rag chain with long_text.txt which is a new file within Sample files with top 20 docs and the answers were fast but not correct. 
+- make streamlit UI delete vectordb when the app quits , streamlit/UI code should be changed to recreate the vectordb every a button is clicked to upload a new file
+    - `Whats Done` : 
+        - Have made the vectordb to create seperate vectorstore for each file uploaded and created the filename as ID to identify that vectorestore to file
+        - Based on above ID, made sure same vectorestore is not created again and again.
+    - `Whats not Done`:
+        - Need to discuss the need for it, considering `whats done` 
+- the prompt in rag has been slighty changed to answer coding questions even if it is not relevant to the context provided . test out the best prompt for this . 
+- integrate web url 
+- integrate sandbox 
+- make UIcode/streamlit handle conversion of different types of data , these data would be translated into text and placed with env['digestDirectory'] , when vectorMain is called it should ingest from the digest directory , current implementation only works for text file . Earliear branches had the load_documents function from the CFModules/LLM/dataIngest.py called . 
+    - `Whats Done` : 
+        - Have made sure that vectorestore is created when pdf or audio is uploaded
+    - `Whats not Done`:
+        - Have yet to run it check for the working of code aka Testing
+
+
+- To enable option to switch between models
+    - `Whats Done` :
+        - Have modified the relevant code to use model from environment file, which is set by new chat.py file called `hfchat.py`
+    - `Whats Not Done` :
+        - Need to check into the internal anaswer retrieval as per mistral model and contruct respective answer layout for different models
