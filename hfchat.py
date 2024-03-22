@@ -24,7 +24,6 @@ from code_cell import main as process_code
 import code_cell
 # from htmlTemplates import button_template
 # from htmlTemplates import script
-from execbox import execbox
 
 
 #from CFModules.Conversion.audioLoader import audio_to_text_model
@@ -65,8 +64,10 @@ def main():
     #     if file_path_input:
     #         v=Vlogger()
     #         data=v.vid_to_text([file_path_input])
+    #         print(data)
     #     else:
     #         st.warning("Please enter the absolute path to the MP4 file.")
+
     if uploaded_file : 
         logging.info(f"File Uploaded")
 
@@ -79,7 +80,7 @@ def main():
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        assistant_response =climain.main(env,prompt,uploaded_file.name)
+        assistant_response =climain.main(env,prompt,uploaded_file.name if uploaded_file!=None else "None")
         print(assistant_response)
 
         lang,code,description=code_cell.extract_code(assistant_response)
