@@ -1,3 +1,5 @@
+import re
+import requests
 import streamlit as st
 import random
 import time
@@ -12,7 +14,7 @@ import os
 import atexit
 import streamlit as st
 from langchain import HuggingFaceHub
-
+from streamlit_option_menu import option_menu
 
 from streamlit.logger import get_logger
 from environment import env
@@ -41,6 +43,7 @@ def delete_tempFiles(directory_path):
                 logging.info("Deleted File "+file_name)
     except Exception as e:
         logging.info(f"Error deleting files: {e}")
+
 @st.cache_data()
 def garbage_collection():
   # Perform your desired cleanup tasks here
@@ -55,7 +58,34 @@ def main():
         st.session_state.data = None
     print(st.session_state.data)
     st.title("Chat with documents using chatFiles")
-    uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
+    selected = option_menu(options=["Text / PDF / Audio",'Web Doc'], orientation="horizontal",menu_title=None,
+         default_index=0)
+    
+
+    uploaded_file = None
+    web_path=None
+    web_data=None
+    if selected == "Text / PDF / Audio":
+        uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3"])
+    # elif selected == "Video (mp4)":
+    #     uploaded_file = st.file_uploader("Upload a video file", type=["mp4"])
+    elif selected == "Web Doc":
+        web_url=st.text_input("Enter the web url")
+        if st.button("Submit"):
+            if web_url:
+                web_data=beautiful_soup(web_url=web_url)
+                web_data=web_data.encode("utf-8")
+                web_path=remove_special_characters(web_url)
+                file_path = os.path.join(env["digestDirectory"] + web_path )
+                with open(file_path, "wb") as file:
+                    file.write(web_data)
+    
+    
+
+
+
+    # uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
+
     # Get the absolute path to the MP4 file from user input
     # file_path_input = st.text_input("Enter the absolute path to the MP4 file:")
 
@@ -80,7 +110,16 @@ def main():
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        assistant_response =climain.main(env,prompt,uploaded_file.name if uploaded_file!=None else "None")
+        file_name=""
+        if selected=="Text / PDF / Audio":
+            file_name=uploaded_file.name
+        elif selected=="Web Doc":
+            web_path=remove_special_characters(web_url)
+            file_name=web_path
+        else:
+            file_name="None"
+
+        assistant_response =climain.main(env,prompt,file_name)
         print(assistant_response)
 
         lang,code,description=code_cell.extract_code(assistant_response)
@@ -128,7 +167,7 @@ def main():
                 st.markdown(message["content"])
 
     # File Upload
-    if uploaded_file is not None and (st.session_state.data==None or uploaded_file.name!=st.session_state.data):
+    if uploaded_file is not None and (st.session_state.data==None or uploaded_file.name!=st.session_state.data) and selected=="Text / PDF / Audio":
         logging.info(f"Duplicating file")
         destination_path = os.path.join( env["digestDirectory"], uploaded_file.name)
         with open(destination_path, "wb") as dest_file:
@@ -148,6 +187,12 @@ def main():
             st.session_state.data=uploaded_file.name
             logging.info("MP3 Loaded")
 
+    elif web_path is not None and selected=="Web Doc" and (st.session_state.data==None or web_path!=st.session_state.data):
+        vectorMain(env,web_path,"txt")
+        st.session_state.data=web_path
+        logging.info("Text Loaded into Vector DB")
+
+
 
     with st.sidebar:
         option = st.selectbox(
@@ -163,6 +208,38 @@ def main():
         else:
             env["model"]=None
         st.write('You selected:', option)
+
+from bs4 import BeautifulSoup
+
+def remove_special_characters(input_string):
+    # Define a regular expression pattern to match special characters
+    pattern = r'[^a-zA-Z0-9\s]'  # Matches any character that is not alphanumeric or whitespace
+    
+    # Use the sub() function from the re module to replace matched characters with an empty string
+    return re.sub(pattern, '', input_string)
+
+def beautiful_soup(web_url):
+    try:
+        # Send a GET request to the URL
+        response = requests.get(web_url)
+        
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            # Parse the HTML content of the page
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Extract the text content from the parsed HTML
+            text_content = soup.get_text()
+            # print("the text coontent from the web ul is " + text_content)
+            
+            return text_content
+        else:
+            print(f"Failed to retrieve content. Status code: {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
         
 if __name__ == "__main__":
     main()
