@@ -7,7 +7,7 @@ class AudioLoader:
     def get_segment(self,deviceType):
         model_size = "large-v3"
     # Run on GPU with FP16
-        model = WhisperModel(model_size, device=deviceType, compute_type="float16")
+        model = WhisperModel(model_size, device="cpu", compute_type="float32")
         self.segments, self.info = model.transcribe(self.location, beam_size=5)
 
     def get_text(self):

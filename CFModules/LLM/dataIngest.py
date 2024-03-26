@@ -98,10 +98,10 @@ def load_document_batch(filepaths,env):
 def loader(env,filename,format):
     if format=="txt":
         converter=env["conversionType"]["txt"]
-        loader=converter(env["digestDirectory"]+filename)
+        loader1=converter(env["digestDirectory"]+filename)
     elif format=="pdf":
         pdfLoaderVar=env["conversionType"]["pdf"]
-        loader=pdfLoaderVar(env["digestDirectory"]+filename)
+        loader1=pdfLoaderVar(env["digestDirectory"]+filename)
     elif format=="mp3":
         audioLoaderVar=env["conversionType"]["mp3"]
         alv=audioLoaderVar(env["digestDirectory"]+filename)
@@ -109,10 +109,11 @@ def loader(env,filename,format):
         data=alv.get_text()
         newfile=filename[:-4] + ".txt"
         destination_path = os.path.join( env["digestDirectory"],newfile)
-        with open(destination_path, "wb") as dest_file:
+        print(type(data))
+        with open(destination_path, "w") as dest_file:
             dest_file.write(data)
-        loader(env,newfile,"txt")           
-    return loader.load()
+        return loader(env,newfile,"txt")           
+    return loader1.load()
 
 def vectorMain(env,filename,format):
     # Load documents and split in chunks

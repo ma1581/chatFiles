@@ -189,12 +189,13 @@ def main(env,query,file):
     answer=qa(env,query)
     return answer
 
-def initialize_global_objects(file=None):
+def initialize_global_objects(file="None"):
     global embeddings
     global db 
     global llm
 
     embeddings = OllamaEmbeddings(model="orca-mini", model_kwargs={"device": env["processor"]})
+    print("isung db =" +file)
     db = Chroma(
             persist_directory=env["vectorDirectory"],
             embedding_function=embeddings,
