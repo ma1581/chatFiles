@@ -47,7 +47,6 @@ def delete_tempFiles(directory_path):
     except Exception as e:
         logging.info(f"Error deleting files: {e}")
 
-
 @st.cache_data()
 def garbage_collection():
   # Perform your desired cleanup tasks here
@@ -84,38 +83,6 @@ def main():
                 with open(file_path, "wb") as file:
                     file.write(web_data)
     
-    
-
-
-
-    # uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
-
-    selected = option_menu(options=["Text / PDF / Audio",'Web Doc'], orientation="horizontal",menu_title=None,
-         default_index=0)
-    
-
-    uploaded_file = None
-    web_path=None
-    web_data=None
-    if selected == "Text / PDF / Audio":
-        uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3"])
-    # elif selected == "Video (mp4)":
-    #     uploaded_file = st.file_uploader("Upload a video file", type=["mp4"])
-    elif selected == "Web Doc":
-        web_url=st.text_input("Enter the web url")
-        if st.button("Submit"):
-            if web_url:
-                web_data=beautiful_soup(web_url=web_url)
-                web_data=web_data.encode("utf-8")
-                web_path=remove_special_characters(web_url)
-                file_path = os.path.join(env["digestDirectory"] + web_path )
-                with open(file_path, "wb") as file:
-                    file.write(web_data)
-    
-    
-
-
-
     # uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
 
     # Get the absolute path to the MP4 file from user input
@@ -142,16 +109,6 @@ def main():
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        file_name=""
-        if selected=="Text / PDF / Audio":
-            file_name=uploaded_file.name
-        elif selected=="Web Doc":
-            web_path=remove_special_characters(web_url)
-            file_name=web_path
-        else:
-            file_name="None"
-
-        assistant_response =climain.main(env,prompt,file_name)
         file_name=""
         if selected=="Text / PDF / Audio":
             file_name=uploaded_file.name
@@ -210,7 +167,6 @@ def main():
 
     # File Upload
     if uploaded_file is not None and (st.session_state.data==None or uploaded_file.name!=st.session_state.data) and selected=="Text / PDF / Audio":
-    if uploaded_file is not None and (st.session_state.data==None or uploaded_file.name!=st.session_state.data) and selected=="Text / PDF / Audio":
         logging.info(f"Duplicating file")
         destination_path = os.path.join( env["digestDirectory"], uploaded_file.name)
         with open(destination_path, "wb") as dest_file:
@@ -229,12 +185,6 @@ def main():
             vectorMain(env,uploaded_file.name,"mp3")            
             st.session_state.data=uploaded_file.name
             logging.info("MP3 Loaded")
-
-    elif web_path is not None and selected=="Web Doc" and (st.session_state.data==None or web_path!=st.session_state.data):
-        vectorMain(env,web_path,"txt")
-        st.session_state.data=web_path
-        logging.info("Text Loaded into Vector DB")
-
 
     elif web_path is not None and selected=="Web Doc" and (st.session_state.data==None or web_path!=st.session_state.data):
         vectorMain(env,web_path,"txt")
@@ -281,6 +231,7 @@ def beautiful_soup(web_url):
             text_content = soup.get_text()
             # print("the text coontent from the web ul is " + text_content)
             
+            text_content=remove_consecutive_newlines(text_content)
             return text_content
         else:
             print(f"Failed to retrieve content. Status code: {response.status_code}")
@@ -289,7 +240,18 @@ def beautiful_soup(web_url):
         print(f"An error occurred: {e}")
         return None
 
-        
+# def remove_excessive_whitespace(text):
+#     # Remove excessive whitespace and newline characters
+#     cleaned_text = re.sub(r'\s+', ' ', text)
+#     return cleaned_text.strip()
+    
+def remove_consecutive_newlines(text):
+    # Define a regular expression pattern to match consecutive multiple newlines
+    pattern = r'\n+'
+    # Replace consecutive multiple newlines with a single newline
+    cleaned_text = re.sub(pattern, '\n', text)
+    return cleaned_text.strip()
+
 if __name__ == "__main__":
     main()
     atexit.register(garbage_collection)
