@@ -19,7 +19,7 @@ from streamlit_option_menu import option_menu
 from streamlit.logger import get_logger
 from environment import env
 #import faster_whisper
-from faster_whisper import WhisperModel
+#from faster_whisper import WhisperModel
 from Vlog2 import Vlogger
 import main as climain
 from code_cell import main as process_code

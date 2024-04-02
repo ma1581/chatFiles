@@ -5,7 +5,7 @@ import os
 from CFModules.Conversion.textFileLoader import txtToString
 from CFModules.Conversion.convert import extract_text_from_pdf
 from langchain.document_loaders import PDFMinerLoader, TextLoader
-from CFModules.Conversion.audioLoader import AudioLoader
+#from CFModules.Conversion.audioLoader import AudioLoader
 from chromadb.config import Settings
 
 #import torch
@@ -25,8 +25,8 @@ env={
     "CHROMA_SETTINGS" : Settings(anonymized_telemetry=False,is_persistent=True),
     "conversionType":{
         "txt":TextLoader,
-        "pdf":PDFMinerLoader,
-        "mp3":AudioLoader
+        "pdf":PDFMinerLoader
+#        "mp3":AudioLoader,
     },
     "cpuCount":os.cpu_count(),
     "processor":"cuda",

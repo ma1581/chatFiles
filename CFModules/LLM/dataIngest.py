@@ -103,12 +103,20 @@ def loader(env,filename,format):
         pdfLoaderVar=env["conversionType"]["pdf"]
         loader1=pdfLoaderVar(env["digestDirectory"]+filename)
     elif format=="mp3":
+        '''
         audioLoaderVar=env["conversionType"]["mp3"]
         alv=audioLoaderVar(env["digestDirectory"]+filename)
         alv.get_segment(env["processor"]) 
         data=alv.get_text()
+        '''
         newfile=filename[:-4] + ".txt"
         destination_path = os.path.join( env["digestDirectory"],newfile)
+
+        import whisper
+        model = whisper.load_model("base")
+        output= model.transcribe(env["digestDirectory"]+filename)
+        data=output["text"]
+
         print(type(data))
         with open(destination_path, "w") as dest_file:
             dest_file.write(data)
