@@ -195,7 +195,6 @@ def initialize_global_objects(file="None"):
     global llm
 
     embeddings = OllamaEmbeddings(model="orca-mini", model_kwargs={"device": env["processor"]})
-    print("isung db =" +file)
     db = Chroma(
             persist_directory=env["vectorDirectory"],
             embedding_function=embeddings,
