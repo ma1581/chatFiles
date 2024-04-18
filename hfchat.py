@@ -203,7 +203,7 @@ def main():
         if option == "Ollama:Orca-mini":
             env["model"]=Ollama(model="orca-mini")
         elif option == "HF:Mistral" :
-            env["model"]=HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1",huggingfacehub_api_token="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")
+            env["model"]=HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1",huggingfacehub_api_token="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")
         else:
             env["model"]=None
         st.write('You selected:', option)
