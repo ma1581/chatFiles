@@ -1,5 +1,7 @@
 import re
 import requests
+import re
+import requests
 import streamlit as st
 import random
 import time
@@ -15,11 +17,12 @@ import atexit
 import streamlit as st
 from langchain import HuggingFaceHub
 from streamlit_option_menu import option_menu
+from streamlit_option_menu import option_menu
 
 from streamlit.logger import get_logger
 from environment import env
 #import faster_whisper
-from faster_whisper import WhisperModel
+#from faster_whisper import WhisperModel
 from Vlog2 import Vlogger
 import main as climain
 from code_cell import main as process_code
@@ -80,10 +83,6 @@ def main():
                 with open(file_path, "wb") as file:
                     file.write(web_data)
     
-    
-
-
-
     # uploaded_file = st.file_uploader("Upload a text file", type=["txt","pdf","mp3","mp4"])
 
     # Get the absolute path to the MP4 file from user input
@@ -204,7 +203,7 @@ def main():
         if option == "Ollama:Orca-mini":
             env["model"]=Ollama(model="orca-mini")
         elif option == "HF:Mistral" :
-            env["model"]=HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1",huggingfacehub_api_token="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")
+            env["model"]=HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1",huggingfacehub_api_token="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")
         else:
             env["model"]=None
         st.write('You selected:', option)
@@ -232,6 +231,7 @@ def beautiful_soup(web_url):
             text_content = soup.get_text()
             # print("the text coontent from the web ul is " + text_content)
             
+            text_content=remove_consecutive_newlines(text_content)
             return text_content
         else:
             print(f"Failed to retrieve content. Status code: {response.status_code}")
@@ -240,7 +240,18 @@ def beautiful_soup(web_url):
         print(f"An error occurred: {e}")
         return None
 
-        
+# def remove_excessive_whitespace(text):
+#     # Remove excessive whitespace and newline characters
+#     cleaned_text = re.sub(r'\s+', ' ', text)
+#     return cleaned_text.strip()
+    
+def remove_consecutive_newlines(text):
+    # Define a regular expression pattern to match consecutive multiple newlines
+    pattern = r'\n+'
+    # Replace consecutive multiple newlines with a single newline
+    cleaned_text = re.sub(pattern, '\n', text)
+    return cleaned_text.strip()
+
 if __name__ == "__main__":
     main()
     atexit.register(garbage_collection)
