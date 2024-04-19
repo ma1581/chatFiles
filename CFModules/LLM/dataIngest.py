@@ -113,11 +113,11 @@ def loader(env,filename,format):
         destination_path = os.path.join( env["digestDirectory"],newfile)
 
         import whisper
-        model = whisper.load_model("base")
+        model = whisper.load_model("base").to("cuda")
         output= model.transcribe(env["digestDirectory"]+filename)
         data=output["text"]
 
-        print(type(data))
+        print(data)
         with open(destination_path, "w") as dest_file:
             dest_file.write(data)
         return loader(env,newfile,"txt")           

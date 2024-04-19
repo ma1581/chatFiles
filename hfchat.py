@@ -15,7 +15,7 @@ import os
 #import torch
 import atexit
 import streamlit as st
-from langchain import HuggingFaceHub
+from langchain.llms import HuggingFaceHub
 from streamlit_option_menu import option_menu
 from streamlit_option_menu import option_menu
 
@@ -29,6 +29,7 @@ from code_cell import main as process_code
 import code_cell
 # from htmlTemplates import button_template
 # from htmlTemplates import script
+
 
 
 #from CFModules.Conversion.audioLoader import audio_to_text_model
