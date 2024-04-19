@@ -1,13 +1,5 @@
-"""
-This file implements prompt template for llama based models. 
-Modify the prompt template based on the model you select. 
-This seems to have significant impact on the output of the LLM.
-"""
-
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
-
-# this is specific to Llama-2.
 
 system_prompt = """You are a helpful assistant, you will use the provided context to answer user questions.
 Read the given context before answering questions and think step by step. If you can not answer a user question based on 
@@ -35,7 +27,4 @@ def get_prompt_template(history=False):
         prompt_template = B_INST + SYSTEM_PROMPT + instruction + E_INST
         prompt = PromptTemplate(input_variables=["context", "question"], template=prompt_template)
     memory = ConversationBufferMemory(input_key="question", memory_key="history")
-    return (
-        prompt,
-        memory,
-    )
+    return (prompt, memory,)
