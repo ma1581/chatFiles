@@ -39,10 +39,9 @@ def garbage_collection():
 
 
 def main():
-    print("Calling stream main")
+    logging.info(f"The app is Running......")
     if "data" not in st.session_state:
         st.session_state.data = None
-    print(st.session_state.data)
     st.title("Chat with documents using chatFiles")
     selected = option_menu(options=["Text / PDF / Audio", "Web Doc"], orientation="horizontal", menu_title=None,
         default_index=0, )
@@ -54,6 +53,7 @@ def main():
     elif selected == "Web Doc":
         web_url = st.text_input("Enter the web url")
         if st.button("Submit"):
+            logging.info(f"Initiating Web Data Parsing")
             if web_url:
                 web_data = beautiful_soup(web_url=web_url)
                 web_data = web_data.encode("utf-8")
@@ -76,7 +76,7 @@ def main():
         else:
             file_name = "None"
         assistant_response = climain.main(env, prompt, file_name)
-        print(assistant_response)
+        logging.info("Response from LLM ===> {assistant_response}")
         lang, code, description = code_cell.extract_code(assistant_response)
         st.session_state.messages.append(
             {"role": "assistant", "content": assistant_response, "new_answer": True, "lang": lang, "code": code,
@@ -114,6 +114,7 @@ def main():
 
     if (uploaded_file is not None and (
             st.session_state.data == None or uploaded_file.name != st.session_state.data) and selected == "Text / PDF / Audio"):
+        logging.info(f"Detected File type: {uploaded_file.type}")
         logging.info(f"Duplicating file")
         destination_path = os.path.join(env["digestDirectory"], uploaded_file.name)
         with open(destination_path, "wb") as dest_file:
@@ -123,7 +124,7 @@ def main():
         if uploaded_file.name.lower().endswith(".pdf"):
             vectorMain(env, uploaded_file.name, "pdf")
             st.session_state.data = uploaded_file.name
-            logging.info("Pdf Loaded")
+            logging.info("Pdf Loaded into Vector DB")
         elif uploaded_file.name.lower().endswith(".txt"):
             vectorMain(env, uploaded_file.name, "txt")
             st.session_state.data = uploaded_file.name
@@ -131,7 +132,7 @@ def main():
         elif uploaded_file.name.lower().endswith(".mp3"):
             vectorMain(env, uploaded_file.name, "mp3")
             st.session_state.data = uploaded_file.name
-            logging.info("MP3 Loaded")
+            logging.info("MP3 Loaded into Vector DB")
 
     elif (web_path is not None and selected == "Web Doc" and (
             st.session_state.data == None or web_path != st.session_state.data)):
@@ -142,8 +143,10 @@ def main():
     with st.sidebar:
         option = st.selectbox("Select Model", ("Ollama:Orca-mini", "HF:Mistral"), index=None, placeholder="....", )
         if option == "Ollama:Orca-mini":
+            logging.info("Using Orca-mini")
             env["model"]=Ollama(model="orca-mini")
         elif option == "HF:Mistral" :
+            logging.info("Using Mistral")
             env["model"]=HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1",huggingfacehub_api_token="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")
         else:
             env["model"] = None
@@ -159,15 +162,17 @@ def beautiful_soup(web_url):
     try:
         response = requests.get(web_url)
         if response.status_code == 200:
+            logging.info(f"Response Successful from URL")
             soup = BeautifulSoup(response.text, "html.parser")
             text_content = soup.get_text()
             text_content = remove_consecutive_newlines(text_content)
+            logging.info(f"Parsing completed")
             return text_content
         else:
-            print(f"Failed to retrieve content. Status code: {response.status_code}")
+            logging.warning(f"Failed to retrieve content. Status code: {response.status_code}")
             return None
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return None
 
 
