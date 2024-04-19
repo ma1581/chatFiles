@@ -11,6 +11,7 @@ from langchain.llms import HuggingFaceHub
 from langchain.llms import Ollama
 from streamlit.logger import get_logger
 from streamlit_option_menu import option_menu
+from streamlit_option_menu import option_menu
 
 import code_cell
 import main as climain
@@ -141,10 +142,9 @@ def main():
     with st.sidebar:
         option = st.selectbox("Select Model", ("Ollama:Orca-mini", "HF:Mistral"), index=None, placeholder="....", )
         if option == "Ollama:Orca-mini":
-            env["model"] = Ollama(model="orca-mini")
-        elif option == "HF:Mistral":
-            login(token="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")
-            env["model"] = HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1", huggingfacehub_api_token="")
+            env["model"]=Ollama(model="orca-mini")
+        elif option == "HF:Mistral" :
+            env["model"]=HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1",huggingfacehub_api_token="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")
         else:
             env["model"] = None
         st.write("You selected:", option)
