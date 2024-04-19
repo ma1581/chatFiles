@@ -26,23 +26,29 @@ def format_docs(docs):
 
 
 def invoke_on_call(func, query):
+    logging.info("inside invoke")
     def wrapper(*args, **kwargs):
+        logging.info("insie wrapper")
         result = func(*args, **kwargs)
-
+        logging.info(result)
         result = result.invoke(input=query)
-
+        logging.info(result)
         return result
 
     def wrapper_for_qa(*args, **kwargs):
+        logging.info("inside wrapper for qa")
         result = func(*args, **kwargs)
+        logging.info("result")
         if callable(result):
             result = result(query)
-
+        logging.info(result['result'])
         return result['result']
 
     if (func == retrieval_qa_pipline):
+        logging.info("calling qa")
         return wrapper_for_qa
     else:
+        logging.info("calling rag maybe, not sure")
         return wrapper
 
 
