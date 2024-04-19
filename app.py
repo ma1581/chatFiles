@@ -6,16 +6,14 @@ import time
 import requests
 import streamlit as st
 from bs4 import BeautifulSoup
-from huggingface_hub import login
 from langchain.llms import HuggingFaceHub
 from langchain.llms import Ollama
 from streamlit.logger import get_logger
 from streamlit_option_menu import option_menu
-from streamlit_option_menu import option_menu
 
 import code_cell
 import main as climain
-from CFModules.LLM.dataIngest import *
+from CFModules.LLM.DataEmbedder import DataEmbedder
 from environment import env
 
 logging = get_logger(__name__)
@@ -44,7 +42,7 @@ def main():
         st.session_state.data = None
     st.title("Chat with documents using chatFiles")
     selected = option_menu(options=["Text / PDF / Audio", "Web Doc"], orientation="horizontal", menu_title=None,
-        default_index=0, )
+                           default_index=0, )
 
     uploaded_file = None
     web_path = None
@@ -80,7 +78,7 @@ def main():
         lang, code, description = code_cell.extract_code(assistant_response)
         st.session_state.messages.append(
             {"role": "assistant", "content": assistant_response, "new_answer": True, "lang": lang, "code": code,
-                "desc": description, "output": None, })
+             "desc": description, "output": None, })
     for index, message in enumerate(st.session_state.messages):
         if index == len(st.session_state.messages) - 1:
             with st.chat_message("assistant"):
@@ -111,7 +109,7 @@ def main():
         else:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
-
+    embedded = DataEmbedder()
     if (uploaded_file is not None and (
             st.session_state.data == None or uploaded_file.name != st.session_state.data) and selected == "Text / PDF / Audio"):
         logging.info(f"Detected File type: {uploaded_file.type}")
@@ -122,21 +120,21 @@ def main():
         logging.info("File Stashed Temporarily")
         logging.info(f"Extacting Content")
         if uploaded_file.name.lower().endswith(".pdf"):
-            vectorMain(env, uploaded_file.name, "pdf")
+            embedded.vectorMain(env, uploaded_file.name, "pdf")
             st.session_state.data = uploaded_file.name
             logging.info("Pdf Loaded into Vector DB")
         elif uploaded_file.name.lower().endswith(".txt"):
-            vectorMain(env, uploaded_file.name, "txt")
+            embedded.vectorMain(env, uploaded_file.name, "txt")
             st.session_state.data = uploaded_file.name
             logging.info("Text Loaded into Vector DB")
         elif uploaded_file.name.lower().endswith(".mp3"):
-            vectorMain(env, uploaded_file.name, "mp3")
+            embedded.vectorMain(env, uploaded_file.name, "mp3")
             st.session_state.data = uploaded_file.name
             logging.info("MP3 Loaded into Vector DB")
 
     elif (web_path is not None and selected == "Web Doc" and (
             st.session_state.data == None or web_path != st.session_state.data)):
-        vectorMain(env, web_path, "txt")
+        embedded.vectorMain(env, web_path, "txt")
         st.session_state.data = web_path
         logging.info("Text Loaded into Vector DB")
 
@@ -144,10 +142,11 @@ def main():
         option = st.selectbox("Select Model", ("Ollama:Orca-mini", "HF:Mistral"), index=None, placeholder="....", )
         if option == "Ollama:Orca-mini":
             logging.info("Using Orca-mini")
-            env["model"]=Ollama(model="orca-mini")
-        elif option == "HF:Mistral" :
+            env["model"] = Ollama(model="orca-mini")
+        elif option == "HF:Mistral":
             logging.info("Using Mistral")
-            env["model"]=HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1",huggingfacehub_api_token="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")
+            env["model"] = HuggingFaceHub(repo_id="mistralai/Mistral-7B-v0.1",
+                                          huggingfacehub_api_token="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")
         else:
             env["model"] = None
         st.write("You selected:", option)

@@ -1,0 +1,10 @@
+ollama
+libavformat
+libavcodec
+libavdevice
+libavutil
+libswscale
+libswresample
+ffmpeg
+gcc gcc-c++
+sqlite

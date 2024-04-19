@@ -1,11 +1,12 @@
+import logging
+
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.chains import RetrievalQA
+from langchain.embeddings import OllamaEmbeddings
+from langchain.vectorstores import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
-from CFModules.LLM.dataIngest import *
-from CFModules.LLM.promptTemplate import get_prompt_template
 from environment import env
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)s - %(message)s", level=logging.INFO)
@@ -27,29 +28,26 @@ def format_docs(docs):
 
 def invoke_on_call(func, query):
     logging.info("inside invoke")
+
     def wrapper(*args, **kwargs):
         logging.info("insie wrapper")
         result = func(*args, **kwargs)
-        logging.info(result)
+        logging.info("FIRST ", result)
         result = result.invoke(input=query)
-        logging.info(result)
+        logging.info("SECOND ", result)
         return result
 
     def wrapper_for_qa(*args, **kwargs):
         logging.info("inside wrapper for qa")
         result = func(*args, **kwargs)
-        logging.info("result")
+        logging.info("FIRST ", result)
         if callable(result):
             result = result(query)
-        logging.info(result['result'])
+        logging.info("SECOND ", result['result'])
         return result['result']
 
-    if (func == retrieval_qa_pipline):
-        logging.info("calling qa")
-        return wrapper_for_qa
-    else:
-        logging.info("calling rag maybe, not sure")
-        return wrapper
+    logging.info("calling rag maybe, not sure")
+    return wrapper
 
 
 def rag(env, query):
@@ -76,23 +74,6 @@ def rag(env, query):
     rag_chain = ({"context": retriever | format_docs,
                   "question": RunnablePassthrough()} | custom_rag_prompt | llm | StrOutputParser())
     return rag_chain
-
-
-def retrieval_qa_pipline(env, query):
-    retriever = db.as_retriever()
-    prompt, memory = get_prompt_template(history=env["history"])
-    if env["history"]:
-        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff",
-                                         # try other chains types as well. refine, map_reduce, map_rerank
-                                         retriever=retriever, return_source_documents=True,  # verbose=True,
-                                         callbacks=callback_manager,
-                                         chain_type_kwargs={"prompt": prompt, "memory": memory}, )
-    else:
-        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff",
-                                         # try other chains types as well. refine, map_reduce, map_rerank
-                                         retriever=retriever, return_source_documents=True,  # verbose=True,
-                                         callbacks=callback_manager, chain_type_kwargs={"prompt": prompt, }, )
-    return qa
 
 
 def main(env, query, file):
